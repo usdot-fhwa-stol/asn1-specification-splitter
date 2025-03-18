@@ -1,5 +1,4 @@
 # asn1-specification-splitter
-This is a public repository that contains mobile application code, scripts and configuration files related to Multi-access edge computing (MEC) cloud solutions managed under USDOT ITS-JPO NextGen Spectrum Testing and Interoperability Testing Teams.  
 The ASN.1 Specification Splitter is a software tool designed to parse, modularize, and analyze ASN.1 schema specifications. The primary goal is to decompose monolithic ASN.1 schema files (J2735, J3224, J2945/4, etc.) into smaller, manageable components 
 
 ## Contribution
