@@ -1,32 +1,69 @@
 # Validation & Parsing Modules
-This document describes the  usage of the **Validation** and **Parsing** components of the ASN.1 splitter system. These modules handle the initial reading, syntax checking, and structured parsing of ASN.1 files into manageable namespaces and components.
 
-### Set up Environment
-- Setting up a virtual environment in the root directory and run the following commands:
-    -  python -m venv venv   (or) python3 -m venv venv
-    -  For MacOS
-        - . ./venv/bin/activate 
-    -  For Windows
-        - venv/scripts/activate
+This document describes the usage of the **Validation** and **Parsing** components of the ASN.1 splitter system. These modules handle the initial reading, syntax checking, and structured parsing of ASN.1 files into manageable namespaces and components.
 
-- Once inside the root directory run:
-    - pip install asn1tools
-    - pip insyall pytest
+---
 
-- Your environment to run .py files will be ready after installation.
+## Setup Environment
+
+> The following steps will create and activate a virtual environment, then install required dependencies. Ensure you are in the project root directory.
 
 
-### Execution
+<summary>Setup Instructions (Ubuntu, macOS, Windows)</summary>
 
-- Setup environment and make sure venv is activated before proceeding to next steps.
+```bash
+# Step 1: Create a virtual environment
+python3 -m venv venv  # or use 'python -m venv venv'
 
-- Once virutal environment is activated. 
-    - Navigate to the directory in which main.py is present. 
-    - Make sure to have the input file path.
-    - To run the file use "python -m src.main.py <file_path>".
-    - It's best practice to have the input file inside the project directory "data/input"
-    - Once the program runs successfully you can find the namespace and schema files inside directory "data/files".
-- Tests 
-    - To run test navigate to the root directory.
-    - Use command "pytest tests/test_validation.py" for validation test
-    - Use command "pytest tests/test_Parser.py" for Parser test
+# Step 2: Activate the virtual environment
+
+# For Ubuntu/Linux
+source venv/bin/activate  # This step activates the environment
+
+# For macOS
+. ./venv/bin/activate     # This step activates the environment
+
+# For Windows
+venv\Scripts\activate     # This step activates the environment
+
+# Step 3: Install required packages
+pip install asn1tools     # Install the ASN.1 tools library
+pip install pytest        # Install pytest for running test cases
+```
+
+
+
+---
+
+## Execution
+
+> Make sure the virtual environment is activated before running the scripts.
+
+```bash
+# Step 1: Activate the virtual environment (see above)
+
+# Step 2: Navigate to the directory where main.py is located
+
+# Step 3: Run the main parser with input ASN.1 file
+python -m src.main <file_path>  # Replace <file_path> with the actual file path
+
+# Note: It's best to place the input file inside 'data/input'
+
+# Step 4: After successful execution, output files will be saved in:
+#         - data/files/ (contains generated namespace and schema files)
+```
+
+---
+
+## Run Tests
+
+```bash
+# Step 1: Navigate to the project root directory
+cd <project-root>  # Replace <project-root> with the actual root folder
+
+# Step 2: Run validation test
+pytest tests/test_validation.py
+
+# Step 3: Run parser test
+pytest tests/test_Parser.py
+```

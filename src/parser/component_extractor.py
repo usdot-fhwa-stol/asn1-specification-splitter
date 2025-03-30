@@ -11,10 +11,16 @@
 
 import os
 import logging
-
+import re
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+def sanitize_filename(name: str) -> str:
+    # Replace or remove invalid characters for filenames
+    return re.sub(r'[<>:"/\\|?*= ]+', "_", name)
+
 
 def extract_components(namespace_files, input_dir="data/files/namespace", output_dir="data/files/schema"):
     """
@@ -74,7 +80,9 @@ def extract_components(namespace_files, input_dir="data/files/namespace", output
             if comp_name[0].islower():
                 continue  # Skip components starting with lowercase (often private/internal)
 
-            output_path = os.path.join(output_dir, f"{comp_name}.asn1")
+            safe_name = sanitize_filename(comp_name)
+            output_path = os.path.join(output_dir, f"{safe_name}.asn1")
+
             try:
                 with open(output_path, 'w') as file:
                     for j in range(components[comp_name]["start"] - 1, components[comp_name]["end"]):

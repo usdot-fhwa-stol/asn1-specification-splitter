@@ -39,12 +39,12 @@ def validate_file(file_path: str) -> str:
     """
     # Check if file exists
     if not os.path.isfile(file_path):
-        logger.error(f"❌ File not found: {file_path}")
+        logger.error(f" File not found: {file_path}")
         sys.exit(1)
 
     # Check for .asn1 file extension
     if not file_path.endswith('.asn1'):
-        logger.error("❌ Invalid file type. Only '.asn1' files are supported.")
+        logger.error(" Invalid file type. Only '.asn1' files are supported.")
         sys.exit(1)
 
     # Read file content
@@ -52,7 +52,7 @@ def validate_file(file_path: str) -> str:
         with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
     except Exception as e:
-        logger.exception(f"❌ Error reading file {file_path}: {e}")
+        logger.exception(f" Error reading file {file_path}: {e}")
         sys.exit(1)
 
     # Validate ASN.1 syntax using asn1tools' internal parser
@@ -60,6 +60,6 @@ def validate_file(file_path: str) -> str:
         asn1tools.parse_string(content) 
         logger.info(f"✅ File '{file_path}' is valid and well-formed.")
     except Exception as e:
-        logger.error(f"❌ ASN.1 syntax error in '{file_path}': {e}")
+        logger.error(f" ASN.1 syntax error in '{file_path}': {e}")
         
     return content
