@@ -1,6 +1,6 @@
-# Validation & Parsing Modules
+# asn1-specification-splitter
 
-This document describes the usage of the **Validation** and **Parsing** components of the ASN.1 splitter system. These modules handle the initial reading, syntax checking, and structured parsing of ASN.1 files into manageable namespaces and components.
+This document describes the usage of the components of the ASN.1 splitter system.
 
 ---
 
@@ -50,7 +50,7 @@ python -m src.main <file_path>  # Replace <file_path> with the actual file path
 # Note: It's best to place the input file inside 'data/input'
 
 # Step 4: After successful execution, output files will be saved in:
-#         - data/files/ (contains generated namespace and schema files)
+#         - data/output/messages 
 ```
 
 ---
@@ -66,4 +66,10 @@ pytest tests/test_validation.py
 
 # Step 3: Run parser test
 pytest tests/test_Parser.py
+
+# Step 4: Run schema merger test
+pytest tests/test_schema_merger.py
+
+# Step 5: Run dependency resolver test
+pytest tests/test_dependency_resolver.py
 ```

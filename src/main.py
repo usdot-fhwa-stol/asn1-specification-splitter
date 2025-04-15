@@ -15,6 +15,8 @@ import os
 from src.parser.component_extractor import extract_components, remove_namespace_references
 from src.parser.namespace_extractor import extract_namespaces, write_namespace_files
 from src.validation.file_validator import  validate_file
+from src.consolidator.schema_merger import copy_message_deps, merge_dependencies, verify_syntax, wrap_definitions
+from src.dependency_resolver.resolver import build_dependency_matrix, resolve_dependencies
 
 import os
 
@@ -75,3 +77,23 @@ schema_names = [i.split(".")[0] for i in schema_files]
 # Step 3: Remove namespace references within schemas
 print("\n Step 3: Removing namespace references from schemas...")
 remove_namespace_references(schema_files, list(namespaces))
+
+# Step 4: Build dependency matrix and resolve transitive dependencies
+print("\n Step 4: Building and resolving dependency graph...")
+deps = build_dependency_matrix(schema_files, schema_names)
+combined_deps = resolve_dependencies(deps)
+
+# Step 5: Merge dependencies and wrap each schema in ASN.1 definition blocks
+print("\n Step 5: Merging dependencies and wrapping schema definitions...")
+merge_dependencies(schema_files, combined_deps)
+wrap_definitions(schema_files)
+
+# Step 6: Verify ASN.1 syntax and structure
+print("\n Step 6: Verifying ASN.1 syntax and structure...")
+
+# Step 7: Copy required message types
+print("\n Step 7: Copying final message types to output folder...")
+verify_syntax(schema_files)
+copy_message_deps(deps)
+
+print("\n  ASN.1 processing completed successfully! Check data/output/messages")
