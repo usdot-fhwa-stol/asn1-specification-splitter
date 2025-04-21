@@ -26,9 +26,9 @@ source venv/bin/activate  # This step activates the environment
 # For Windows
 venv\Scripts\activate     # This step activates the environment
 
-# Step 3: Install required packages
-pip install asn1tools     # Install the ASN.1 tools library
-pip install pytest        # Install pytest for running test cases
+# Step 3 : Install From Requirements.txt
+pip install -r requirements.txt
+
 ```
 
 

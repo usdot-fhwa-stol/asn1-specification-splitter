@@ -116,7 +116,7 @@ def resolve_dependencies(deps):
             for dep in deps[key]:
                 visited.add(dep)
                 get_deps(dep, visited)
-            combined_deps[key] = sorted(list(visited))
+            combined_deps[key] = list(visited)
 
         # logger.debug(f"Transitive dependencies for {key}: {combined_deps[key]}")
 

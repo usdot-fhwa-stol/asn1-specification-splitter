@@ -93,7 +93,6 @@ def verify_syntax(schema_files, target_dir="data/files/schema_updated", error_lo
         error_log_path (str): Path to output JSON file containing syntax errors.
     """
     error_count = 0
-    error_files = {}
 
     for schema_file in schema_files:
         file_path = os.path.join(target_dir, schema_file)
@@ -102,17 +101,15 @@ def verify_syntax(schema_files, target_dir="data/files/schema_updated", error_lo
         try:
             # Use parse_files to parse the syntax and validate syntax
             asn1tools.parse_files(file_path)
+            # print(f"Syntax check passed for {schema_file}")
 
         except Exception as e:
-          
-            error_files[schema_file] = str(e)
+            print(f"Something went wrong with {schema_file}: {e}")
             error_count += 1
 
-   
+    return error_count
 
-    if error_files:
-        with open(error_log_path, 'w', encoding='utf-8') as file:
-            json.dump(error_files, file, indent=4)
+
 
 def copy_message_deps(deps, src_dir="data/files/schema_updated", dest_dir="data/output/messages"):
     """

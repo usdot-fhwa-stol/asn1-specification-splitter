@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 def sanitize_filename(name: str) -> str:
     # Replace or remove invalid characters for filenames
-    return re.sub(r'[<>:"/\\|?*= ]+', "_", name)
+    return re.sub(r'[<>:"/\\|?*= ]+', "", name)
 
 
 def extract_components(namespace_files, input_dir="data/files/namespace", output_dir="data/files/schema"):
