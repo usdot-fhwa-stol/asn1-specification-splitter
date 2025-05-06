@@ -72,4 +72,10 @@ pytest tests/test_schema_merger.py
 
 # Step 5: Run dependency resolver test
 pytest tests/test_dependency_resolver.py
+
+# Step 6: Run the end-to-end splitter as a plain Python script
+# a) Navigate to tests folder from root
+cd tests
+# b) run the command
+python validate_asn1_messages.py <input_file_path>  # Replace <file_path> with the actual input file path
 ```
