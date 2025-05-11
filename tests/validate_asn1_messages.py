@@ -14,48 +14,75 @@ import re
 import sys
 import asn1tools
 
-#  Read ASN.1 file path from command line
+# Read ASN.1 file path from command-line arguments
+# Ensures a file path is provided by the user when executing the script
 if len(sys.argv) < 2:
     print("Usage: python validate_asn1_messages.py <path_to_asn1_file>")
-    sys.exit(1)
+    sys.exit(1)  # Exit if no input file is provided
 
+# Path to the input ASN.1 file
 ASN1_FILE = sys.argv[1]
+
+# Directory where message type schema files are expected to be located
 OUTPUT_DIR = os.path.join("..", "data", "output", "messages")
 
 
 def extract_message_types_from_asn1(path):
+    """
+    Extracts all message types defined under the 'MessageTypes' block in an ASN.1 file.
+
+    This function looks for a block starting with 'MessageTypes ::= ...'
+    and extracts component names that match the pattern:
+    { ComponentName IDENTIFIED BY ... }
+
+    Args:
+        path (str): Path to the ASN.1 file.
+
+    Returns:
+        list[str]: Alphabetically sorted list of component names found in the block.
+    """
     with open(path, 'r') as f:
         lines = f.readlines()
 
-    inside_block = False
+    inside_block = False  # Flag to determine if parser is within the MessageTypes block
     message_lines = []
 
     for line in lines:
+        # Detect start of MessageTypes block
         if not inside_block and "MessageTypes" in line and "::=" in line:
             inside_block = True
             continue
 
+        # Collect lines until the ellipsis ("...") indicates the end of the block
         if inside_block:
             if "..." in line:
                 break
             message_lines.append(line.strip())
 
     matches = []
+
+    # Regex to match lines like: { SomeMessage IDENTIFIED BY some-id }
     for line in message_lines:
         m = re.match(r'\{\s*(\w+)\s+IDENTIFIED\s+BY\s+\w+\s*\}', line)
         if m:
-            matches.append(m.group(1))
+            matches.append(m.group(1))  # Capture the component name
 
     print(f"\n Extracted {len(matches)} message types:\n{matches}\n")
     return sorted(matches)
 
 
 def validate_extension_in_output_folder():
+    """
+    Checks if any non-.asn1 files exist in the message output directory.
+
+    Prints a warning for files with invalid extensions and lists them.
+    """
     print("Checking for invalid extensions in output folder...")
     non_asn1_files = [
         f for f in os.listdir(OUTPUT_DIR)
         if os.path.isfile(os.path.join(OUTPUT_DIR, f)) and not f.endswith('.asn1')
     ]
+
     if non_asn1_files:
         print(f"\n Found {len(non_asn1_files)} file(s) with invalid extensions:")
         for file in non_asn1_files:
@@ -66,8 +93,20 @@ def validate_extension_in_output_folder():
 
 
 def main():
+    """
+    Main execution routine.
+
+    Steps:
+    1. Validate output directory for incorrect file extensions.
+    2. Extract expected message types from the ASN.1 file.
+    3. For each message type:
+       - Check if corresponding .asn1 file exists.
+       - Validate its extension.
+       - Attempt to compile it using asn1tools to ensure it's syntactically correct.
+    """
     validate_extension_in_output_folder()
 
+    # Get list of expected message type component names
     message_types = extract_message_types_from_asn1(ASN1_FILE)
 
     for message_type in message_types:
@@ -82,22 +121,24 @@ def main():
         else:
             print("File exists")
 
-        # Check 2: Extension
+        # Check 2: Extension validation
         if not expected_file.endswith('.asn1'):
             print("Invalid file extension")
             continue
         else:
             print("Extension is valid")
 
-        # Check 3: Compile with asn1tools
+        # Check 3: Validate ASN.1 syntax by compiling
         try:
-            asn1tools.compile_files([expected_file], 'uper')
-            print("Validation successful : no missing dependecies or syntax errors")
+            asn1tools.compile_files([expected_file], 'uper')  # Using 'uper' encoding for validation
+            print("Validation successful : no missing dependencies or syntax errors")
         except Exception as e:
             print(f"Validation failed: {e}")
 
         print("-" * 60)
 
 
+# Script entry point
 if __name__ == "__main__":
     main()
+
