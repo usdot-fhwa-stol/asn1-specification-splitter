@@ -60,6 +60,9 @@ def build_dependency_matrix(schema_files, schema_names, schema_dir="data/files/s
         lines = data.splitlines()
 
         for line in lines:
+            if "::=" in line:
+                line=line.split("::=")[1]
+
             # Strip inline comments
             if "--" in line:
                 line = line.split("--")[0]
