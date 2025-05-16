@@ -67,6 +67,13 @@ def build_dependency_matrix(schema_files, schema_names, schema_dir="data/files/s
             words = line.split()
 
             for word in words:
+                
+                if "." in word and ".." not in word and "..." not in word:
+                    new_words=word.split(".")
+                    for new_word in new_words:
+                        if new_word in schema_names and new_word!=name:
+                            dependencies.add(new_word)
+
                 word = clean_string(word)
 
                 # If a word matches another schema component and is not self-reference
