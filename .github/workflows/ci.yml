@@ -1,0 +1,48 @@
+name: Build, Test & SonarCloud
+
+on:
+  push:
+    branches: [ master, develop, "hotfix/**", "release/**"]
+  pull_request:
+
+permissions:
+  contents: read          
+  pull-requests: read
+
+jobs:
+  test-and-analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+        cache: "pip"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov
+    - name: Run tests
+      run: |
+        pytest -q --cov=src --cov-report=xml
+
+    - name: Sonar scan
+      uses: SonarSource/sonarqube-scan-action@v5
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: https://sonarcloud.io   
+      with:
+        args: >
+          -Dsonar.organization=usdot-fhwa-stol
+          -Dsonar.projectKey=usdot-fhwa-stol_asn1-specification-splitter
+          -Dsonar.sources=src
+          -Dsonar.tests=tests
+          -Dsonar.exclusions=POC/**  
+          -Dsonar.coverage.exclusions=**/__init__.py,src/main.py,POC/**
+          -Dsonar.python.version=3.11
+          -Dsonar.python.coverage.reportPaths=coverage.xml
+          -Dsonar.sourceEncoding=UTF-8
