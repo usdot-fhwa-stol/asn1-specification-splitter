@@ -2,7 +2,7 @@ name: Build, Test & SonarCloud
 
 on:
   push:
-    branches: [ main, develop, "hotfix/**", "release/**" ]
+    branches: [ main, develop, "hotfix/**", "release/**" ,feature/add_CI ]
   pull_request:
 
 jobs:
