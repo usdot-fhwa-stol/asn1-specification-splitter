@@ -77,11 +77,16 @@ def extract_components(namespace_files, input_dir="data/files/namespace", output
 
         # Write each top-level component to its own file
         for comp_name in components:
-            if comp_name[0].islower():
-                continue  # Skip components starting with lowercase (often private/internal)
-
             safe_name = sanitize_filename(comp_name)
             output_path = os.path.join(output_dir, f"{safe_name}.asn1")
+
+            if comp_name[0].islower():
+                output_definition_path= os.path.join("data/files/definitions", f"{safe_name}.asn1")
+                # print(f"Writing component '{comp_name}' to: {output_definition_path}")
+                with open(output_definition_path,'w') as f:
+                        for j in range(components[comp_name]["start"] - 1, components[comp_name]["end"]):
+                            f.write(lines[j] + '\n')
+                continue
 
             try:
                 with open(output_path, 'w') as file:
