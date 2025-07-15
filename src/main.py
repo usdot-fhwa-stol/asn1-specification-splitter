@@ -15,7 +15,7 @@ import os
 from src.parser.component_extractor import extract_components, remove_namespace_references
 from src.parser.namespace_extractor import extract_namespaces, write_namespace_files
 from src.validation.file_validator import  validate_file
-from src.consolidator.schema_merger import copy_message_deps, merge_dependencies, verify_syntax, wrap_definitions
+from src.consolidator.schema_merger import copy_message_deps, merge_dependencies, verify_syntax, wrap_definitions, wrap_message_frame
 from src.dependency_resolver.resolver import build_dependency_matrix, resolve_dependencies
 
 import os
@@ -28,7 +28,8 @@ def ensure_data_directories():
     required_dirs = [
         "data/output",
         "data/files/namespace",
-        "data/files/schema"
+        "data/files/schema",
+        "data/files/definitions",
     ]
 
     input_dir=[
@@ -40,6 +41,7 @@ def ensure_data_directories():
         os.remove("./error_files.json")
 
     for path in required_dirs:
+        print(path)
         # empty folders before starting
         if os.path.exists(path) and os.path.isdir(path):
             for file in os.listdir(path):
@@ -100,24 +102,34 @@ if __name__ == "__main__":
     remove_namespace_references(schema_files, list(namespaces))
 
     # Step 4: Build dependency matrix and resolve transitive dependencies
+    asn1_definitions_files= os.listdir("data/files/definitions")
+    asn1_definitions= [i.split(".")[0] for i in asn1_definitions_files]
+
+
     print("\n Step 4: Building and resolving dependency graph...")
-    deps = build_dependency_matrix(schema_files, schema_names)
+    deps = build_dependency_matrix(schema_files, asn1_definitions,schema_names)
     combined_deps = resolve_dependencies(deps)
 
     # Step 5: Merge dependencies and wrap each schema in ASN.1 definition blocks
     print("\n Step 5: Merging dependencies and wrapping schema definitions...")
-    merge_dependencies(schema_files, combined_deps)
+    merge_dependencies(schema_files, asn1_definitions,combined_deps)
     wrap_definitions(schema_files)
+
+    copy_message_deps(deps)
+
+    message_files = os.listdir("data/output/messages")
+    wrap_message_frame(message_files)
+
 
     # Step 6: Verify ASN.1 syntax and structure
     print("\n Step 6: Verifying ASN.1 syntax and structure...")
 
     # Step 7: Copy required message types
     print("\n Step 7: Copying final message types to output folder...")
-    res=verify_syntax(schema_files)
+    res=verify_syntax(message_files)
     if res > 0:
         print(f"  {res} errors found in schema files.")
     
-    copy_message_deps(deps)
+   
 
     print("\n  ASN.1 processing completed successfully! Check data/output/messages")

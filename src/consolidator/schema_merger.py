@@ -19,7 +19,7 @@ import asn1tools
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def merge_dependencies(schema_files, combined_deps, input_dir="data/files/schema", output_dir="data/files/schema_updated"):
+def merge_dependencies(schema_files, asn1_definitions,combined_deps, input_dir="data/files/schema", output_dir="data/files/schema_updated"):
     """
     Merges schema files with their transitive dependencies and writes the combined content to a new directory.
 
@@ -30,7 +30,7 @@ def merge_dependencies(schema_files, combined_deps, input_dir="data/files/schema
         output_dir (str): Directory to write the merged schema files.
     """
     os.makedirs(output_dir, exist_ok=True)
-
+    schema_names= [f.split(".")[0] for f in schema_files]
     for schema_file in schema_files:
         name = schema_file.split(".")[0]
         base_path = os.path.join(input_dir, schema_file)
@@ -38,13 +38,15 @@ def merge_dependencies(schema_files, combined_deps, input_dir="data/files/schema
         try:
             with open(base_path, 'r', encoding='utf-8') as f:
                 data = f.read()
-
-            
-
             for dep in combined_deps.get(name, []):
-                dep_path = os.path.join(input_dir, f"{dep}.asn1")
-                with open(dep_path, 'r', encoding='utf-8') as dep_file:
-                    data += dep_file.read()
+                if dep in schema_names:
+                    dep_path = os.path.join(input_dir, f"{dep}.asn1")
+                    with open(dep_path, 'r', encoding='utf-8') as dep_file:
+                        data += dep_file.read()
+                elif dep in asn1_definitions:
+                    dep_path = os.path.join("data/files/definitions", f"{dep}.asn1")
+                    with open(dep_path, 'r', encoding='utf-8') as dep_file:
+                        data += dep_file.read()
 
             out_path = os.path.join(output_dir, schema_file)
             with open(out_path, 'w', encoding='utf-8') as out_file:
@@ -72,7 +74,7 @@ def wrap_definitions(schema_files, target_dir="data/files/schema_updated"):
            
 
             # Prepend and append definition markers
-            wrapped_lines = [f"{name} DEFINITIONS ::= BEGIN"] + lines + ["END"]
+            wrapped_lines = [f"{name} DEFINITIONS AUTOMATIC TAGS::= BEGIN"] + lines + ["END"]
 
             with open(file_path, 'w', encoding='utf-8') as file:
                 for line in wrapped_lines:
@@ -80,6 +82,42 @@ def wrap_definitions(schema_files, target_dir="data/files/schema_updated"):
 
         except Exception as e:
             logger.error(f"Failed to wrap ASN.1 definitions in {schema_file}: {e}")
+
+
+def wrap_message_frame(message_files,target_dir="data/output/messages"):
+    """
+    Wraps each message ASN.1 file in `MessageFrame ::= BEGIN ... END` block.
+
+    Args:
+        message_files (list[str]): List of message schema filenames.
+        target_dir (str): Directory containing message files.
+    """
+    for message_file in message_files:
+        file_path = os.path.join(target_dir, message_file)
+
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                data=file.read()
+        
+                lines=data.splitlines()
+                new_lines=[]
+                new_lines.append(f"{message_file.split('.')[0]} DEFINITIONS AUTOMATIC TAGS ::= BEGIN")
+                new_lines.append("MessageFrame ::= SEQUENCE {")
+                new_lines.append(f"    messageId DSRCmsgID,")
+                new_lines.append(f"    value {message_file.split('.')[0]}")
+                new_lines.append("}\n")
+
+                new_lines.append("DSRCmsgID ::= INTEGER (0..32767)\n")
+
+                for line in lines[1:]:
+                    new_lines.append(line)
+
+
+            with open(file_path, 'w', encoding='utf-8') as file:
+                file.write('\n'.join(new_lines))
+
+        except Exception as e:
+            logger.error(f"Failed to wrap MessageFrame in {message_file}: {e}")
 
 def verify_syntax(schema_files, target_dir="data/files/schema_updated", error_log_path="error_files.json"):
     """

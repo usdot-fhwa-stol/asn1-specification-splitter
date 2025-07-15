@@ -29,7 +29,7 @@ def clean_string(s):
     """
     return re.sub(r'[^a-zA-Z0-9-]', '', s)
 
-def build_dependency_matrix(schema_files, schema_names, schema_dir="data/files/schema"):
+def build_dependency_matrix(schema_files, asn1_definitions,schema_names, schema_dir="data/files/schema"):
     """
     Parses ASN.1 schema files to build a direct dependency matrix.
 
@@ -44,7 +44,6 @@ def build_dependency_matrix(schema_files, schema_names, schema_dir="data/files/s
         dict: A mapping from each schema name to a list of its direct dependencies.
     """
     dependency_matrix = {}
-
     for schema_file in schema_files:
         dependencies = set()
         name = schema_file.split(".")[0]
@@ -79,11 +78,14 @@ def build_dependency_matrix(schema_files, schema_names, schema_dir="data/files/s
 
                 word = clean_string(word)
 
+                if word in asn1_definitions and word != name:
+                    dependencies.add(word)
+
                 # If a word matches another schema component and is not self-reference
                 if word in schema_names and word != name:
                     dependencies.add(word)
 
-        dependency_matrix[name] = sorted(list(dependencies))
+        dependency_matrix[name] = list(dependencies)
         # logger.debug(f"Dependencies for {name}: {dependency_matrix[name]}")
 
     return dependency_matrix
