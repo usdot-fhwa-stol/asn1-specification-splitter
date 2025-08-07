@@ -104,7 +104,9 @@ def wrap_message_frame(message_files,target_dir="data/output/messages"):
                 new_lines.append(f"{message_file.split('.')[0]} DEFINITIONS AUTOMATIC TAGS ::= BEGIN")
                 new_lines.append("MessageFrame ::= SEQUENCE {")
                 new_lines.append(f"    messageId DSRCmsgID,")
-                new_lines.append(f"    value {message_file.split('.')[0]}")
+                new_lines.append("    value CHOICE { ")
+                new_lines.append(f"     {message_file.split('.')[0]}     {message_file.split('.')[0]}")
+                new_lines.append("    }")
                 new_lines.append("}\n")
 
                 new_lines.append("DSRCmsgID ::= INTEGER (0..32767)\n")
