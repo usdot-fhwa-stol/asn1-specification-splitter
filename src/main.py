@@ -105,7 +105,6 @@ if __name__ == "__main__":
     asn1_definitions_files= os.listdir("data/files/definitions")
     asn1_definitions= [i.split(".")[0] for i in asn1_definitions_files]
 
-
     print("\n Step 4: Building and resolving dependency graph...")
     deps = build_dependency_matrix(schema_files, asn1_definitions,schema_names)
     combined_deps = resolve_dependencies(deps)
@@ -114,7 +113,7 @@ if __name__ == "__main__":
     print("\n Step 5: Merging dependencies and wrapping schema definitions...")
     merge_dependencies(schema_files, asn1_definitions,combined_deps)
     wrap_definitions(schema_files)
-
+     
     copy_message_deps(deps)
 
     message_files = os.listdir("data/output/messages")
