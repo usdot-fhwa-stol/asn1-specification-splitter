@@ -10,10 +10,10 @@
 # the License.
 
 import os
-import json
 import logging
 import shutil
 import asn1tools
+import re
 
 # Set up logger
 logging.basicConfig(level=logging.INFO)
@@ -92,22 +92,54 @@ def wrap_message_frame(message_files,target_dir="data/output/messages"):
         message_files (list[str]): List of message schema filenames.
         target_dir (str): Directory containing message files.
     """
+
+    message_types={}
+
+    # Pattern to match IDENTIFIED BY lines
+    pattern = r'\{\s*(\w+)\s+IDENTIFIED BY\s+(\w+)\s*\}'
+    with open("data/files/schema/MessageTypes.asn1","r") as f:
+        data=f.read()
+        lines=data.splitlines()
+        for line in lines:
+            if "IDENTIFIED BY" in line:
+                match= re.search(pattern, line)
+                if match:
+                    message_name = match.group(1)
+                    message_type = match.group(2)
+                    message_types[message_name] = message_type
+    # print(f"Message types found: {message_types}")
     for message_file in message_files:
         file_path = os.path.join(target_dir, message_file)
 
         try:
             with open(file_path, 'r', encoding='utf-8') as file:
                 data=file.read()
-        
+
+                spec_name=message_file.split('.')[0]
+                # print(f"Processing {spec_name}...")
+                with open(f"data/files/definitions/{message_types[spec_name]}.asn1", 'r') as def_file:
+                    def_data = def_file.read()
+
                 lines=data.splitlines()
                 new_lines=[]
-                new_lines.append(f"{message_file.split('.')[0]} DEFINITIONS AUTOMATIC TAGS ::= BEGIN")
-                new_lines.append("MessageFrame ::= SEQUENCE {")
-                new_lines.append(f"    messageId DSRCmsgID,")
-                new_lines.append(f"    value {message_file.split('.')[0]}")
-                new_lines.append("}\n")
+                new_lines.append(f"{spec_name} DEFINITIONS AUTOMATIC TAGS ::= BEGIN")
+                new_lines.append("""
+MessageFrame ::= SEQUENCE {
+   messageId   MESSAGE-ID-AND-TYPE.&id({MessageTypes}),
+   value       MESSAGE-ID-AND-TYPE.&Type({MessageTypes}{@.messageId}),
+   ...
+   }
 
+MESSAGE-ID-AND-TYPE ::= CLASS {
+   &id    DSRCmsgID UNIQUE,
+   &Type 
+   } WITH SYNTAX {&Type IDENTIFIED BY &id}
+
+MessageTypes MESSAGE-ID-AND-TYPE ::= {  """)
+                new_lines.append(f"{{ {spec_name} IDENTIFIED BY {message_types.get(spec_name)} }}")
+                new_lines.append("}\n")
                 new_lines.append("DSRCmsgID ::= INTEGER (0..32767)\n")
+                new_lines.append(def_data)
 
                 for line in lines[1:]:
                     new_lines.append(line)
@@ -161,6 +193,9 @@ def copy_message_deps(deps, src_dir="data/files/schema_updated", dest_dir="data/
     os.makedirs(dest_dir, exist_ok=True)
 
     for message in deps.get('MessageTypes', []):
+
+        if message[0].islower():
+            continue
         src_path = os.path.join(src_dir, f"{message}.asn1")
         dest_path = os.path.join(dest_dir, f"{message}.asn1")
 
