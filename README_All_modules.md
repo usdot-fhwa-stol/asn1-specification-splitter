@@ -4,6 +4,12 @@ This document describes the usage of the components of the ASN.1 splitter system
 
 ---
 
+## Manual Changes of the Master Specification File
+
+The component NodeOffsetPointXY has the following changes
+- In the regional of the component change   `RegionalExtension {{REGION.Reg-NodeOffsetPointXY}}` to `SEQUENCE (SIZE(1..2)) OF RegionalExtension {{REGION.Reg-NodeOffsetPointXY}}`
+
+
 ## Setup Environment
 
 > The following steps will create and activate a virtual environment, then install required dependencies. Ensure you are in the project root directory.
